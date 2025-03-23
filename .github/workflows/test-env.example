@@ -1,0 +1,14 @@
+DEBUG=True
+SECRET_KEY=github-actions-test-key
+SERVER=0.0.0.0
+
+SQL_ENGINE=django.db.backends.postgresql
+SQL_DATABASE=shop_test
+SQL_USER=postgres
+SQL_PASSWORD=postgres
+SQL_HOST=localhost
+SQL_PORT=5432
+
+JWT_SECRET_KEY=github-actions-jwt-test-key
+
+REDIS_URL=redis://localhost:6379 

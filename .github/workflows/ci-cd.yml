@@ -1,0 +1,117 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: shop_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13.2'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.6.1
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v3
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+        
+    - name: Install dependencies
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: |
+        poetry install --with dev
+        
+    - name: Install pre-commit
+      run: |
+        poetry run pip install pre-commit
+        
+    - name: Set up environment
+      run: |
+        cp .github/workflows/test-env.example .env
+        
+    - name: Lint with pre-commit
+      run: |
+        poetry run pre-commit run --all-files
+        
+    - name: Run migrations
+      run: |
+        poetry run python manage.py migrate --noinput
+        
+    - name: Run tests
+      run: |
+        poetry run python manage.py test
+        
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13.2'
+        
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.6.1
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    
+    # Placeholder for deployment steps
+    # Uncomment and customize these steps when you have a deployment target
+    
+    # - name: Set up SSH
+    #   uses: webfactory/ssh-agent@v0.5.4
+    #   with:
+    #     ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    
+    # - name: Deploy to server
+    #   run: |
+    #     ssh user@yourserver.com "cd /path/to/deployment && git pull && poetry install && poetry run python manage.py migrate && sudo systemctl restart your-service"
+    
+    - name: Deployment notification
+      run: |
+        echo "Tests passed! Add your actual deployment steps here." 
