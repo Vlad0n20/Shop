@@ -42,22 +42,15 @@ jobs:
         python-version: '3.13.2'
         
     - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.6.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-        
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
         
     - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: |
+        poetry --version
+        poetry config virtualenvs.create true
+        poetry config virtualenvs.in-project true
         poetry install --with dev
         
     - name: Install pre-commit
@@ -94,11 +87,9 @@ jobs:
         python-version: '3.13.2'
         
     - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.6.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
     
     # Placeholder for deployment steps
     # Uncomment and customize these steps when you have a deployment target
