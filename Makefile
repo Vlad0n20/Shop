@@ -15,4 +15,3 @@ create_admin:
 
 create_admin_in_container:
 	docker exec -ti app python manage.py createsuperuser
-

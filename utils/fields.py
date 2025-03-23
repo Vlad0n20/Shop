@@ -1,7 +1,6 @@
 import os.path
 
 from django.conf import settings
-from django.db.models.fields.files import ImageFieldFile
 from rest_framework import serializers
 
 from utils.uploaded_file import resize_image
@@ -15,11 +14,11 @@ class ChoicesField(serializers.ChoiceField):
         }
 
     def to_representation(self, value):
-        if value in ('', None):
+        if value in ("", None):
             return value
         return {
-            'value': self.choice_strings_to_values.get(value, value),
-            'display': self.choice_strings_to_display.get(value, value),
+            "value": self.choice_strings_to_values.get(value, value),
+            "display": self.choice_strings_to_display.get(value, value),
         }
 
 
@@ -32,7 +31,11 @@ class AvatarField(serializers.ImageField):
     def to_representation(self, value):
         if not value:
             return None
-        url = settings.UPLOAD_DIR['media'] + '/'.join([value.instance.__class__.__name__.lower(),
-                        str(value.instance.pk),
-                        os.path.basename(value.name)])
+        url = settings.UPLOAD_DIR["media"] + "/".join(
+            [
+                value.instance.__class__.__name__.lower(),
+                str(value.instance.pk),
+                os.path.basename(value.name),
+            ]
+        )
         return url

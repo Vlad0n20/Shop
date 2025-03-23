@@ -1,8 +1,7 @@
-""" Middleware to provide current request user """
-from django.utils.deprecation import MiddlewareMixin
-
+# ddleware to provide current request
 from threading import current_thread
 
+from django.utils.deprecation import MiddlewareMixin
 
 _requests = {}
 
@@ -12,7 +11,6 @@ def current_request():
 
 
 class RequestMiddleware(MiddlewareMixin):
-
     def process_request(self, request):
         _requests[current_thread().ident] = request
 
